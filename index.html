@@ -31,7 +31,11 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+    }
     body {
       background: var(--pitch);
       font-family: var(--font);
@@ -39,19 +43,23 @@
     }
 
     .shell {
-      min-height: 100dvh;
-      min-height: 100vh;
+      height: 100dvh;
+      height: 100vh;
+      max-height: 100dvh;
+      max-height: 100vh;
+      overflow: hidden;
       background: var(--pitch);
     }
 
     .app {
       max-width: 430px;
+      height: 100%;
+      max-height: 100%;
       margin: 0 auto;
-      min-height: 100dvh;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       position: relative;
+      overflow: hidden;
     }
 
     .preview-badge {
@@ -119,22 +127,32 @@
     .streak { text-align: right; }
 
     .stage {
-      flex: 1 1 auto;
+      flex: 1 1 0;
       display: flex;
       flex-direction: column;
       min-height: 0;
       position: relative;
+      overflow: hidden;
     }
 
     .pitch {
-      --goal-top: 28px;
-      --goal-w: min(300px, 86vw);
-      --goal-h: calc(var(--goal-w) * 118 / 300);
+      --scenery-min: clamp(50px, calc(100cqh * 0.58), 72px);
+      --goal-top: clamp(8px, 2.5cqh, 28px);
+      --goal-w-cap: min(300px, 86vw);
+      --goal-h-cap: calc(var(--goal-w-cap) * 118 / 300);
+      --goal-h: min(
+        var(--goal-h-cap),
+        calc(100cqh - var(--goal-top) - var(--scenery-min))
+      );
+      --goal-w: calc(var(--goal-h) * 300 / 118);
       --goal-line-y: calc(var(--goal-top) + var(--goal-h));
-      --keeper-h: 56px;
+      --scenery-h: calc(100cqh - var(--goal-line-y));
+      --keeper-h: clamp(40px, calc(var(--goal-h) * 0.475), 56px);
+      --keeper-w: calc(var(--keeper-h) * 40 / 56);
+      --box6-h: min(54px, max(10px, calc(var(--scenery-h) * 0.32)));
       position: relative;
-      flex: 1 1 auto;
-      min-height: 180px;
+      flex: 1 1 0;
+      min-height: 0;
       container-type: size;
       container-name: pitch;
       background: linear-gradient(180deg, var(--sky) 0 var(--goal-line-y), var(--pitch) var(--goal-line-y));
@@ -145,8 +163,8 @@
       position: absolute;
       top: var(--goal-line-y);
       left: 50%;
-      width: min(168px, 46vw);
-      height: 54px;
+      width: min(168px, 46vw, calc(var(--goal-w) * 0.56));
+      height: var(--box6-h);
       transform: translateX(-50%);
       border: 2px solid rgba(237, 232, 220, 0.78);
       border-top: 0;
@@ -223,7 +241,7 @@
       transition: left 0.5s ease, top 0.5s ease, transform 0.5s ease;
     }
     .keeper {
-      width: 40px;
+      width: var(--keeper-w);
       height: var(--keeper-h);
       left: 50%;
       top: calc(var(--goal-line-y) - var(--keeper-h));
@@ -253,17 +271,24 @@
       bottom: 0;
       top: var(--goal-line-y);
       pointer-events: none;
+      overflow: hidden;
       container-type: size;
       container-name: scenery;
+      --spot-inset: clamp(4px, 6cqh, 22px);
+      --kicker-gap: 6px;
     }
     .kicker {
-      --kicker-h: min(76px, max(44px, calc(100cqh - 36px)));
+      --kicker-h: min(
+        76px,
+        max(0px, calc(100cqh - var(--spot-inset) - var(--box6-h) - var(--kicker-gap)))
+      );
       position: absolute;
       left: 50%;
-      bottom: clamp(8px, 8cqh, 28px);
+      top: calc(var(--box6-h) + var(--kicker-gap));
+      bottom: auto;
       height: var(--kicker-h);
-      width: calc(var(--kicker-h) * 54 / 76);
-      max-width: 54px;
+      width: min(54px, calc(var(--kicker-h) * 54 / 76));
+      max-height: calc(100cqh - var(--box6-h) - var(--kicker-gap) - var(--spot-inset));
       transform: translateX(-70%);
       transform-origin: 50% 100%;
     }
@@ -274,9 +299,9 @@
       position: absolute;
       z-index: 2;
       left: 50%;
-      bottom: calc(clamp(8px, 8cqh, 28px) + 4px);
-      width: 28px;
-      height: 28px;
+      bottom: calc(var(--spot-inset) + 6px);
+      width: clamp(20px, 7cqh, 28px);
+      height: clamp(20px, 7cqh, 28px);
       transform: translateX(-50%);
       border: 1.5px solid rgba(237, 232, 220, 0.85);
       border-radius: 50%;
@@ -286,7 +311,7 @@
       position: absolute;
       z-index: 3;
       left: 50%;
-      bottom: clamp(8px, 8cqh, 28px);
+      bottom: var(--spot-inset);
       width: 16px;
       height: 16px;
       transform: translateX(-50%);
@@ -321,6 +346,7 @@
 
     .deck {
       flex: 0 0 auto;
+      flex-shrink: 0;
       background: var(--hud-bar);
       padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
       z-index: 4;
@@ -521,6 +547,39 @@
       stroke-width: 5;
       stroke-linecap: round;
       fill: none;
+    }
+
+    @media (max-height: 620px) {
+      .preview-badge {
+        padding: 5px 10px;
+        padding-top: calc(5px + env(safe-area-inset-top, 0px));
+        font-size: 11px;
+      }
+      .hud {
+        padding: 8px 14px 6px;
+      }
+      .hud-top { min-height: 40px; }
+      .hud-score { margin-top: 2px; }
+      .cap { font-size: 11px; }
+      .deck {
+        padding: 8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+      }
+      .pick {
+        margin-bottom: 4px;
+        min-height: 14px;
+        font-size: 12px;
+      }
+      .pad { gap: 4px; }
+      .powers { margin-top: 4px; }
+      .hint {
+        margin-top: 2px;
+        font-size: 11px;
+        line-height: 1.2;
+      }
+      .kick { margin-top: 4px; }
+      .pitch {
+        --goal-top: clamp(4px, 2cqh, 14px);
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
