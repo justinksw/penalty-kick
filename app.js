@@ -74,6 +74,41 @@ function init() {
   syncHud();
   syncControls();
   updatePickLine();
+  bindViewportSync();
+}
+
+/** Fit shell to iOS visual viewport; minimal scroll only if deck is still clipped. */
+function bindViewportSync() {
+  const run = () => {
+    const vv = window.visualViewport;
+    const h = Math.round(vv?.height ?? window.innerHeight);
+    document.documentElement.style.setProperty('--app-height', `${h}px`);
+
+    requestAnimationFrame(() => {
+      const kick = document.getElementById('kick-btn');
+      const again = document.getElementById('again-btn');
+      const deckResult = document.getElementById('deck-result');
+      const btn =
+        deckResult && !deckResult.hidden ? again : kick;
+      if (!btn) {
+        document.body.classList.remove('is-scroll-fallback');
+        return;
+      }
+      const vvTop = vv?.offsetTop ?? 0;
+      const visibleBottom = vvTop + h;
+      const clipped = btn.getBoundingClientRect().bottom > visibleBottom + 1;
+      document.body.classList.toggle('is-scroll-fallback', clipped);
+    });
+  };
+
+  window.__syncViewport = run;
+  run();
+  window.addEventListener('resize', run);
+  window.addEventListener('orientationchange', () => {
+    window.setTimeout(run, 120);
+  });
+  vv?.addEventListener('resize', run);
+  vv?.addEventListener('scroll', run);
 }
 
 function canInteract() {
@@ -140,6 +175,7 @@ function syncControls() {
   els.scenery.classList.toggle('is-result', isResult);
   els.diffBtn.disabled = lockDuringFlight();
   syncKickEnabled();
+  if (typeof window.__syncViewport === 'function') window.__syncViewport();
 }
 
 function setKeeperPose(side, diving) {

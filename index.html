@@ -31,22 +31,41 @@
     }
 
     * { box-sizing: border-box; }
-    html, body {
+    html {
       margin: 0;
       height: 100%;
-      overflow: hidden;
+      height: -webkit-fill-available;
     }
     body {
+      margin: 0;
+      height: 100vh;
+      height: 100dvh;
+      height: var(--app-height, 100dvh);
+      min-height: -webkit-fill-available;
+      overflow: hidden;
       background: var(--pitch);
       font-family: var(--font);
       color: var(--ink);
+      touch-action: manipulation;
+    }
+    body.is-scroll-fallback {
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      height: auto;
+      min-height: var(--app-height, 100dvh);
+    }
+    body.is-scroll-fallback .shell {
+      height: auto;
+      min-height: var(--app-height, 100dvh);
+      max-height: none;
     }
 
     .shell {
-      height: 100dvh;
-      height: 100vh;
-      max-height: 100dvh;
-      max-height: 100vh;
+      height: 100%;
+      max-height: 100%;
+      min-height: 0;
       overflow: hidden;
       background: var(--pitch);
     }
@@ -350,6 +369,7 @@
       background: var(--hud-bar);
       padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
       z-index: 4;
+      touch-action: manipulation;
     }
     .pick {
       margin: 0 0 10px;
