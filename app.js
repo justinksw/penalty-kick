@@ -43,10 +43,13 @@ function init() {
   els.keeper = $('#keeper');
   els.kicker = $('#kicker');
   els.ballSpot = $('#ball-spot');
-  els.resultOverlay = $('#result-overlay');
+  els.pitchResult = $('#pitch-result');
   els.resultWord = $('#result-word');
   els.resultHint = $('#result-hint');
   els.againBtn = $('#again-btn');
+  els.deckAim = $('#deck-aim');
+  els.deckResult = $('#deck-result');
+  els.scenery = $('.scenery');
   els.diffSheet = $('#diff-picker');
   els.diffConfirm = $('#diff-confirm');
   els.confirmFromTo = $('#confirm-fromto');
@@ -126,11 +129,15 @@ function syncHud() {
 }
 
 function syncControls() {
-  const locked = state.phase !== 'aim';
+  const isAim = state.phase === 'aim';
+  const isResult = state.phase === 'result';
+  const locked = !isAim;
   els.padButtons.forEach((b) => { b.disabled = locked; });
   els.powerButtons.forEach((b) => { b.disabled = locked; });
-  els.kickBtn.style.display = state.phase === 'result' ? 'none' : '';
-  els.againBtn.hidden = state.phase !== 'result';
+  els.deckAim.hidden = isResult;
+  els.deckResult.hidden = !isResult;
+  els.pitchResult.hidden = !isResult;
+  els.scenery.classList.toggle('is-result', isResult);
   els.diffBtn.disabled = lockDuringFlight();
   syncKickEnabled();
 }
@@ -207,8 +214,8 @@ function showResult(result, delayMs) {
       els.resultHint.textContent = '';
     }
 
-    els.resultOverlay.hidden = false;
     els.kicker.classList.add('is-hidden');
+    els.ballSpot.classList.add('is-hidden');
     state.phase = 'result';
     syncHud();
     syncControls();
@@ -221,7 +228,6 @@ function showResult(result, delayMs) {
 function onAgain() {
   state.phase = 'aim';
   state.zone = null;
-  els.resultOverlay.hidden = true;
   els.padButtons.forEach((b) => b.setAttribute('aria-pressed', 'false'));
   els.goalCells.forEach((c) => {
     c.classList.remove('is-on');

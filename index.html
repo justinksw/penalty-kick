@@ -127,16 +127,23 @@
     }
 
     .pitch {
+      --goal-top: 28px;
+      --goal-w: min(300px, 86vw);
+      --goal-h: calc(var(--goal-w) * 118 / 300);
+      --goal-line-y: calc(var(--goal-top) + var(--goal-h));
+      --keeper-h: 56px;
       position: relative;
       flex: 1 1 auto;
-      min-height: 200px;
-      background: linear-gradient(180deg, var(--sky) 0 clamp(100px, 26vw, 146px), var(--pitch) clamp(100px, 26vw, 146px));
+      min-height: 180px;
+      container-type: size;
+      container-name: pitch;
+      background: linear-gradient(180deg, var(--sky) 0 var(--goal-line-y), var(--pitch) var(--goal-line-y));
       overflow: hidden;
     }
 
     .box6 {
       position: absolute;
-      top: clamp(100px, 26vw, 146px);
+      top: var(--goal-line-y);
       left: 50%;
       width: min(168px, 46vw);
       height: 54px;
@@ -149,12 +156,11 @@
 
     .goal-wrap {
       position: absolute;
-      top: 28px;
+      top: var(--goal-top);
       left: 50%;
       transform: translateX(-50%);
-      width: min(300px, 86vw);
-      height: auto;
-      aspect-ratio: 300 / 118;
+      width: var(--goal-w);
+      height: var(--goal-h);
       z-index: 2;
     }
     .goal-line {
@@ -218,33 +224,48 @@
     }
     .keeper {
       width: 40px;
-      height: 56px;
+      height: var(--keeper-h);
       left: 50%;
-      top: 90px;
+      top: calc(var(--goal-line-y) - var(--keeper-h));
       transform: translateX(-50%);
     }
     .keeper.is-dived-left {
-      left: 96px;
-      top: 96px;
+      left: clamp(72px, 24vw, 96px);
+      top: calc(var(--goal-line-y) - 50px);
       width: 44px;
       height: 58px;
       transform: rotate(-58deg);
       transform-origin: 50% 80%;
     }
     .keeper.is-dived-right {
-      left: calc(100% - 140px);
-      top: 96px;
+      right: clamp(72px, 24vw, 96px);
+      left: auto;
+      top: calc(var(--goal-line-y) - 50px);
       width: 44px;
       height: 58px;
       transform: rotate(58deg);
       transform-origin: 50% 80%;
     }
+    .scenery {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: var(--goal-line-y);
+      pointer-events: none;
+      container-type: size;
+      container-name: scenery;
+    }
     .kicker {
-      width: clamp(40px, 12vw, 54px);
-      height: clamp(56px, 18vw, 76px);
+      --kicker-h: min(76px, max(44px, calc(100cqh - 36px)));
+      position: absolute;
       left: 50%;
-      bottom: clamp(16px, 5vw, 28px);
+      bottom: clamp(8px, 8cqh, 28px);
+      height: var(--kicker-h);
+      width: calc(var(--kicker-h) * 54 / 76);
+      max-width: 54px;
       transform: translateX(-70%);
+      transform-origin: 50% 100%;
     }
     .kicker.is-hidden { visibility: hidden; }
     .kicker.is-kicking { transform: translateX(-70%) scale(1.02); }
@@ -253,7 +274,7 @@
       position: absolute;
       z-index: 2;
       left: 50%;
-      bottom: 8px;
+      bottom: calc(clamp(8px, 8cqh, 28px) + 4px);
       width: 28px;
       height: 28px;
       transform: translateX(-50%);
@@ -265,7 +286,7 @@
       position: absolute;
       z-index: 3;
       left: 50%;
-      bottom: 14px;
+      bottom: clamp(8px, 8cqh, 28px);
       width: 16px;
       height: 16px;
       transform: translateX(-50%);
@@ -273,7 +294,30 @@
       background: #F7F4EC;
       border: 1.5px solid var(--post);
     }
-    .spot.is-hidden { visibility: hidden; }
+    .spot.is-hidden,
+    .scenery.is-result .spot-ring { visibility: hidden; }
+
+    .pitch-result {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: var(--goal-line-y);
+      bottom: 0;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 12px 20px;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(30, 38, 32, 0) 0 20%,
+        rgba(30, 38, 32, 0.12) 55%,
+        rgba(30, 38, 32, 0.22) 100%
+      );
+    }
+    .pitch-result[hidden] { display: none !important; }
 
     .deck {
       flex: 0 0 auto;
@@ -366,28 +410,13 @@
     }
     .again { margin-top: 0; }
 
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        180deg,
-        rgba(30, 38, 32, 0) 0 46%,
-        rgba(30, 38, 32, 0.28) 68%,
-        rgba(30, 38, 32, 0.5) 100%
-      );
-      z-index: 6;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 24px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-      pointer-events: none;
+    .deck-aim[hidden],
+    .deck-result[hidden] {
+      display: none !important;
     }
-    .overlay[hidden] { display: none !important; }
-    .overlay .again { pointer-events: auto; }
 
     .result-word {
-      margin: auto 0 12px;
+      margin: 0 0 8px;
       font-size: clamp(44px, 12vw, 52px);
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -555,45 +584,51 @@
             </svg>
           </div>
 
-          <div class="kicker" id="kicker" aria-hidden="true">
-            <svg viewBox="0 0 40 62">
-              <circle class="fill" cx="20" cy="9" r="6"/>
-              <path class="fill" d="M11 17h18l-1.4 20H12.4z"/>
-              <path class="stroke" d="M12 21 L6 36"/>
-              <path class="stroke" d="M28 21 L35 30"/>
-              <path class="stroke" d="M16 37 L13 58"/>
-              <path class="stroke" d="M24 37 L30 58"/>
-            </svg>
+          <div class="scenery">
+            <div class="kicker" id="kicker" aria-hidden="true">
+              <svg viewBox="0 0 40 62">
+                <circle class="fill" cx="20" cy="9" r="6"/>
+                <path class="fill" d="M11 17h18l-1.4 20H12.4z"/>
+                <path class="stroke" d="M12 21 L6 36"/>
+                <path class="stroke" d="M28 21 L35 30"/>
+                <path class="stroke" d="M16 37 L13 58"/>
+                <path class="stroke" d="M24 37 L30 58"/>
+              </svg>
+            </div>
+            <span class="spot-ring" aria-hidden="true"></span>
+            <div class="spot" id="ball-spot" aria-hidden="true"></div>
           </div>
-          <span class="spot-ring" aria-hidden="true"></span>
-          <div class="spot" id="ball-spot" aria-hidden="true"></div>
+
+          <div class="pitch-result" id="pitch-result" hidden role="status">
+            <p class="result-word is-goal" id="result-word">ゴール！</p>
+            <p class="result-hint" id="result-hint" hidden></p>
+          </div>
         </div>
 
         <div class="deck" id="deck">
-          <p class="pick" id="pick-line"></p>
-          <div class="pad" id="zone-pad" role="group" aria-label="狙う場所">
-            <button type="button" data-index="0">左上</button>
-            <button type="button" data-index="1">上</button>
-            <button type="button" data-index="2">右上</button>
-            <button type="button" data-index="3">左</button>
-            <button type="button" data-index="4">まんなか</button>
-            <button type="button" data-index="5">右</button>
-            <button type="button" data-index="6">左下</button>
-            <button type="button" data-index="7">下</button>
-            <button type="button" data-index="8">右下</button>
+          <div class="deck-aim" id="deck-aim">
+            <p class="pick" id="pick-line"></p>
+            <div class="pad" id="zone-pad" role="group" aria-label="狙う場所">
+              <button type="button" data-index="0">左上</button>
+              <button type="button" data-index="1">上</button>
+              <button type="button" data-index="2">右上</button>
+              <button type="button" data-index="3">左</button>
+              <button type="button" data-index="4">まんなか</button>
+              <button type="button" data-index="5">右</button>
+              <button type="button" data-index="6">左下</button>
+              <button type="button" data-index="7">下</button>
+              <button type="button" data-index="8">右下</button>
+            </div>
+            <div class="powers" id="power-group" role="group" aria-label="蹴り方">
+              <button type="button" data-power="placed" aria-pressed="true">コース</button>
+              <button type="button" data-power="driven">パワー</button>
+            </div>
+            <p class="hint" id="power-hint">枠に入りやすい</p>
+            <button type="button" class="kick" id="kick-btn" disabled>蹴る</button>
           </div>
-          <div class="powers" id="power-group" role="group" aria-label="蹴り方">
-            <button type="button" data-power="placed" aria-pressed="true">コース</button>
-            <button type="button" data-power="driven">パワー</button>
+          <div class="deck-result" id="deck-result" hidden>
+            <button type="button" class="again" id="again-btn">もう一回</button>
           </div>
-          <p class="hint" id="power-hint">枠に入りやすい</p>
-          <button type="button" class="kick" id="kick-btn" disabled>蹴る</button>
-        </div>
-
-        <div class="overlay" id="result-overlay" hidden role="status">
-          <p class="result-word is-goal" id="result-word">ゴール！</p>
-          <p class="result-hint" id="result-hint" hidden></p>
-          <button type="button" class="again" id="again-btn" hidden>もう一回</button>
         </div>
 
         <div class="sheet-backdrop" id="diff-picker" hidden>
