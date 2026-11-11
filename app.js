@@ -79,8 +79,8 @@ function init() {
 
 /** Fit shell to iOS visual viewport; minimal scroll only if deck is still clipped. */
 function bindViewportSync() {
+  const vv = window.visualViewport;
   const run = () => {
-    const vv = window.visualViewport;
     const h = Math.round(vv?.height ?? window.innerHeight);
     document.documentElement.style.setProperty('--app-height', `${h}px`);
 
